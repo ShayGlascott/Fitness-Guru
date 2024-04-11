@@ -1,0 +1,7 @@
+{
+  "name": "fitness-guru",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
