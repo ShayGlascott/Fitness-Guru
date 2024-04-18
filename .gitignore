@@ -19,3 +19,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+ionic-app/package-lock.json
+ionic-app/package.json
