@@ -1,0 +1,13 @@
+.menu-link {
+    color: white;
+    text-decoration: none;
+}
+
+.menu-link:hover {
+    color: red;
+    text-decoration: none;
+}
+
+.icon {
+    margin-left: 7px;
+}
