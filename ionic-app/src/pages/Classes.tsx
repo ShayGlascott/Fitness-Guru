@@ -52,7 +52,7 @@ const Classes: React.FC = () => {
       instructor: 'Chris Davis'
     }
   ];
-
+  const [schedule, setSchedule] = useState<ClassItem[]>(fakeClasses);
   const [classes, setClasses] = useState<ClassItem[]>(fakeClasses);
 
   function getClasses() {
@@ -65,6 +65,21 @@ const Classes: React.FC = () => {
           instructor: classItem.instructor
         }));
         setClasses(classData);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
+  function getSchedule() {
+    axios.get('http://localhost:8000/classSchedule')
+      .then(function (response) {
+        console.log(response);
+        const classData = response.data.map((classItem: ClassItem) => ({
+          className: classItem.className,
+          time: classItem.startTime,
+          instructor: classItem.instructor
+        }));
+        setSchedule(classData);
       })
       .catch(function (error) {
         console.log(error);
@@ -113,64 +128,93 @@ const Classes: React.FC = () => {
           </IonToolbar>
         </IonHeader>
         <IonContent className="ion-padding">
-          <IonCard className="card">
-            <IonGrid>
+          <IonGrid>
+            <IonCard className='card'>
               <IonRow>
-                <IonCol size='2.4'>
-                  <IonText>Name</IonText>
-                </IonCol>
-                <IonCol size='2.4'>
-                  <IonText>Start time</IonText>
-                </IonCol>
-                <IonCol size='2.4'>
-                  <IonText>End time</IonText>
-                </IonCol>
-                <IonCol size='2.4'>
-                  <IonText>Instructor</IonText>
-                </IonCol>
-                <IonCol size='2.4'>
+                <IonCol size="5.25"></IonCol>
+                <IonCol size="2.5">
+                  <IonTitle>Schedule:</IonTitle>
                 </IonCol>
               </IonRow>
-
-              
-
-              {classes.map((classItem, index) => (
+              {schedule.map((classItem, index) => (
                 <IonRow>
                   <IonCol size='2.4'>
-                    <IonItem>
+                    <IonItem lines='none'>
                       <IonText>{classItem.className}</IonText>
                     </IonItem>
                   </IonCol>
                   <br />
                   <IonCol size='2.4'>
-                    <IonItem>
+                    <IonItem lines='none'>
                       <IonText>{classItem.startTime}</IonText>
                     </IonItem>
                   </IonCol>
                   <br />
                   <IonCol size='2.4'>
-                    <IonItem>
+                    <IonItem lines='none'>
                       <IonText>{classItem.endTime}</IonText>
                     </IonItem>
                   </IonCol>
                   <br />
                   <IonCol size='2.4'>
-                    <IonItem>
+                    <IonItem lines='none'>
                       <IonText>{classItem.instructor}</IonText>
                     </IonItem>
                   </IonCol>
                   <br></br>
                   <IonCol size='2.4'>
-                    <IonItem>
-                      <IonButton color={"dark"}>Add Class</IonButton>
+                    <IonItem lines='none'>
+                      <IonButton color={"danger"}>Delete Class</IonButton>
                     </IonItem>
                   </IonCol>
                 </IonRow>
               ))}
-            </IonGrid>
-          </IonCard>
+            </IonCard>
+            <br></br>
+            <IonCard className='card'>
+              <IonRow>
+                <IonCol style={{ textAlign: 'center' }}>
+                  <IonText style={{ fontSize: '25px' }}>Add Classes:</IonText>
+                </IonCol>
+              </IonRow>
+              {classes.map((classItem, index) => (
+                <IonCard className='classes'>
+                  <IonRow>
+                    <IonCol style={{ textAlign: 'center' }}>
+                      <IonText style={{ fontSize: '18px' }}>{classItem.className}</IonText>
+                    </IonCol>
+                  </IonRow>
+                  <br />
+                  <IonRow>
+                    <IonCol style={{ textAlign: 'center' }}>
+                      <IonText>Start time: {classItem.startTime}</IonText>
+                    </IonCol>
+                  </IonRow>
+                  <br />
+                  <IonRow>
+                    <IonCol style={{ textAlign: 'center' }}>
+                      <IonText>End time: {classItem.endTime}</IonText>
+                    </IonCol>
+                  </IonRow>
+                  <br />
+                  <IonRow>
+                    <IonCol style={{ textAlign: 'center' }}>
+                      <IonText>Instructor: {classItem.instructor}</IonText>
+                    </IonCol>
+                  </IonRow>
+                  <br />
+                  <IonRow>
+                    <IonCol style={{ textAlign: 'center' }}>
+                      <IonButton color={"dark"}>Add Class</IonButton>
+                    </IonCol>
+                  </IonRow>
+                </IonCard>
+              ))}
+            </IonCard>
+          </IonGrid>
+
         </IonContent>
-      </IonPage>
+      </IonPage >
     </>
   );
 };
