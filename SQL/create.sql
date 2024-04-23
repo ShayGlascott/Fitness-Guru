@@ -1,3 +1,5 @@
+CREATE DATABASE Fitness_guru;
+
 CREATE TABLE Member (
     MemberID INT PRIMARY KEY,
     Name VARCHAR(100),
@@ -20,7 +22,6 @@ CREATE TABLE Member_Class (
     PRIMARY KEY (MemberID, ClassID)
 );
 
--- Create Goal table
 CREATE TABLE Goal (
     GoalID INT PRIMARY KEY,
     Goal VARCHAR(255)

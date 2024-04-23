@@ -11,3 +11,10 @@
 .icon {
     margin-left: 7px;
 }
+
+@media screen and (min-width: 600px){
+    .card{
+        margin-left: 10%;
+        margin-right: 10%;
+    }
+}
