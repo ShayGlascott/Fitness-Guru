@@ -1,10 +1,10 @@
 .menu-link {
-    color: white;
+    /* color: white; */
     text-decoration: none;
 }
 
 .menu-link:hover {
-    color: red;
+    color: purple;
     text-decoration: none;
 }
 
@@ -15,6 +15,11 @@
 .classes{
     margin-left: 25%;
     margin-right: 25%;
+    text-align: center;
+}
+
+.ionTitle{
+    font-size: 25px;
     text-align: center;
 }
 

@@ -5,17 +5,18 @@ import { body } from 'ionicons/icons';
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
 import { useState } from 'react';
+import Menu from './Menu';
 
-
+interface ClassItem {
+  className: string;
+  startTime: number;
+  endTime: number;
+  instructor: string;
+}
 
 const Classes: React.FC = () => {
 
-  interface ClassItem {
-    className: string;
-    startTime: number;
-    endTime: number;
-    instructor: string;
-  }
+  
   const fakeClasses: ClassItem[] = [
     {
       className: 'Yoga',
@@ -86,38 +87,20 @@ const Classes: React.FC = () => {
       });
   }
 
+  function removeClass() {
+    axios.post('http://localhost:8000/removeClass')
+      .then(function (response) {
+        console.log(response);
+        
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
+
   return (
     <>
-      <IonMenu contentId="main-content">
-        <IonHeader>
-          <IonToolbar>
-            <IonTitle>Fitness Guru</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent className="ion-padding">
-          <IonMenuToggle autoHide={false}>
-            <NavLink to={'/progress'} className="menu-link">
-              <IonText>Progress Report</IonText>
-              <IonIcon icon={body} className='icon'></IonIcon>
-            </NavLink>
-          </IonMenuToggle>
-          <br /><br />
-          <IonMenuToggle autoHide={false}>
-            <NavLink to={'/classes'} className="menu-link">
-              <IonText>Classes</IonText>
-              <IonIcon icon={body} className='icon'></IonIcon>
-            </NavLink>
-          </IonMenuToggle>
-          <br /><br />
-          <IonMenuToggle autoHide={false}>
-            <NavLink to={'/membership'} className="menu-link">
-              <IonText>Membership</IonText>
-              <IonIcon icon={body} className='icon'></IonIcon>
-            </NavLink>
-          </IonMenuToggle>
-          <br></br>
-        </IonContent>
-      </IonMenu>
+      <Menu />
       <IonPage id="main-content">
         <IonHeader>
           <IonToolbar>
@@ -131,9 +114,24 @@ const Classes: React.FC = () => {
           <IonGrid>
             <IonCard className='card'>
               <IonRow>
-                <IonCol size="5.25"></IonCol>
-                <IonCol size="2.5">
-                  <IonTitle>Schedule:</IonTitle>
+                <IonCol style={{ textAlign: 'center' }}>
+                  <IonText style={{ fontSize: '25px' }}>Schedule:</IonText>
+                </IonCol>
+              </IonRow>
+              <IonRow>
+                <IonCol>
+                  <IonText> Class </IonText>
+                </IonCol>
+                <IonCol>
+                  <IonText> Start </IonText>
+                </IonCol>
+                <IonCol>
+                  <IonText> End </IonText>
+                </IonCol>
+                <IonCol>
+                  <IonText> Instructor </IonText>
+                </IonCol>
+                <IonCol>
                 </IonCol>
               </IonRow>
               {schedule.map((classItem, index) => (
