@@ -5,32 +5,40 @@ CREATE TABLE Member (
     Name VARCHAR(100),
     StartDate DATE,
     EndDate DATE,
-    MembershipTier VARCHAR(50)
+    MembershipTier INT
 );
 
 CREATE TABLE Class (
     ClassID INT PRIMARY KEY
+    Name VARCHAR(100),
+    Instructor VARCHAR(100),
+    Date DATE,
+    StartTime TIME,
+    EndTime TIME,
 );
 
 CREATE TABLE Member_Class (
     MemberID INT,
     ClassID INT,
-    Date DATE,
-    FitnessData VARCHAR(255),
     FOREIGN KEY (MemberID) REFERENCES Member(MemberID),
     FOREIGN KEY (ClassID) REFERENCES Class(ClassID),
     PRIMARY KEY (MemberID, ClassID)
 );
 
-CREATE TABLE Goal (
-    GoalID INT PRIMARY KEY,
-    Goal VARCHAR(255)
+CREATE TABLE Progress (
+    ProgressID INT PRIMARY KEY,
+    Date DATE,
+    Time TIME,
+    Distance FLOAT,
+    Calories INT,
+    Heartrate INT,
+    Exercise VARCHAR(100)
 );
 
-CREATE TABLE Member_Goal (
+CREATE TABLE Member_Progress (
     MemberID INT,
-    GoalID INT,
+    ProgressID INT,
     FOREIGN KEY (MemberID) REFERENCES Member(MemberID),
-    FOREIGN KEY (GoalID) REFERENCES Goal(GoalID),
-    PRIMARY KEY (MemberID, GoalID)
+    FOREIGN KEY (ProgressID) REFERENCES Progress(ProgressID),
+    PRIMARY KEY (MemberID, ProgressID)
 );
