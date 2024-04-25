@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import Menu from './Menu';
 
 interface ClassItem {
-  classID?:number;
+  classID?: number;
   className: string;
   date: string;
   startTime: string;
@@ -20,14 +20,14 @@ const Classes: React.FC = () => {
   const [schedule, setSchedule] = useState<ClassItem[]>([]);
   const [classes, setClasses] = useState<ClassItem[]>([]);
   const [showToast, setShowToast] = useState<boolean>(false);
-
+  const [toastMsg, setToastMsg] = useState('');
 
   function getClasses() {
     axios.get('http://localhost:8000/classes')
       .then(function (response) {
         // console.log(response.data);
         setClasses(response.data);
-        
+
       })
       .catch(function (error) {
         console.log(error);
@@ -38,7 +38,7 @@ const Classes: React.FC = () => {
       .then(function (response) {
         console.log(response.data);
         setSchedule(response.data);
-        
+
       })
       .catch(function (error) {
         console.log(error);
@@ -47,10 +47,16 @@ const Classes: React.FC = () => {
 
   function removeClass(classID: string | number | undefined) {
     console.log(classID);
-    axios.delete('http://localhost:8000/classes/1/'+classID)
+    axios.delete('http://localhost:8000/classes/1/' + classID)
       .then(function (response) {
         console.log(response);
-        window.location.reload();
+        if(response.data.message == 'Class not found in schedule'){
+          setShowToast(true);
+          setToastMsg(response.data.message);
+        }
+        else{
+          window.location.reload();
+        }
       })
       .catch(function (error) {
         console.log(error);
@@ -58,10 +64,17 @@ const Classes: React.FC = () => {
   }
   function addClass(classID: string | number | undefined) {
     console.log(classID);
-    axios.post('http://localhost:8000/classes/1/'+classID)
+    axios.post('http://localhost:8000/classes/1/' + classID)
       .then(function (response) {
         console.log(response);
-        window.location.reload();
+        if (response.data.message == 'Class already added to schedule') {
+          setShowToast(true);
+          setToastMsg(response.data.message);
+        }
+        else {
+          window.location.reload();
+        }
+
       })
       .catch(function (error) {
         console.log(error);
@@ -136,8 +149,7 @@ const Classes: React.FC = () => {
                   <br></br>
                   <IonCol size='2.4'>
                     <IonItem lines='none'>
-                      
-                      <IonButton color={"danger"} onClick={()=>removeClass(classItem.classID)}>Remove Class</IonButton>
+                      <IonButton color={"danger"} onClick={() => removeClass(classItem.classID)}>Remove Class</IonButton>
                     </IonItem>
                   </IonCol>
                 </IonRow>
@@ -185,15 +197,18 @@ const Classes: React.FC = () => {
                   <br />
                   <IonRow>
                     <IonCol style={{ textAlign: 'center' }}>
-                      <IonButton color={"success"} onClick={()=>addClass(classItem.classID)}>Add Class</IonButton>
+                      <IonButton color={"success"} onClick={() => addClass(classItem.classID)}>Add Class</IonButton>
                     </IonCol>
                   </IonRow>
                 </IonCard>
               ))}
             </IonCard>
           </IonGrid>
-          <IonToast 
-            
+          <IonToast
+            isOpen={showToast} 
+            onDidDismiss={() => setShowToast(false)} 
+            message={toastMsg}
+            duration={2000} 
           />
         </IonContent>
       </IonPage >

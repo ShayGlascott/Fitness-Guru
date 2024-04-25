@@ -10,7 +10,7 @@ import { Line } from 'react-chartjs-2';
 
 
 interface ProgressGraphProps {
-  data: ProgressItem[]; // Define the type of the 'data' prop
+  data: ProgressItem[]; 
 }
 
 interface ProgressItem {

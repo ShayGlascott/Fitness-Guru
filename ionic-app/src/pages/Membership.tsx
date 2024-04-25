@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { IonAlert, IonButton, IonButtons, IonCard, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonItem, IonList, IonMenu, IonMenuButton, IonMenuToggle, IonPage, IonRow, IonText, IonTitle, IonToolbar } from '@ionic/react';
 import ExploreContainer from '../components/ExploreContainer';
 import './styling.css';
-import Menu from './Menu'; 
+import Menu from './Menu';
 
 import { body, thermometer } from 'ionicons/icons';
 import { NavLink } from 'react-router-dom';
@@ -19,7 +19,7 @@ const Membership: React.FC = () => {
   const currentDate: Date = new Date();
   console.log(currentDate);
   function updateTier() {
-    axios.post(`http://localhost:8000/member/0/tier/`+selectedTier)
+    axios.post(`http://localhost:8000/member/0/tier/` + selectedTier)
       .then(function (response) {
         console.log(response.data)
 
@@ -29,15 +29,15 @@ const Membership: React.FC = () => {
       });
 
   }
-  function getMember(){
+  function getMember() {
     axios.get(`http://localhost:8000/member/1`)
-      .then(function(response){
+      .then(function (response) {
         console.log(response.data);
         setUsername(response.data.Name);
         setStartDate(response.data.StartDate);
         setEndDate(response.data.EndDate);
       })
-      .catch(function(error){
+      .catch(function (error) {
         console.log(error);
       });
   }
@@ -49,7 +49,7 @@ const Membership: React.FC = () => {
   useEffect(() => {
     getMember();
   }, [])
-  function handleSelectPlan(){
+  function handleSelectPlan() {
 
   }
 
@@ -99,8 +99,8 @@ const Membership: React.FC = () => {
                   </IonItem>
                 </IonCol>
                 <IonCol size='3'>
-                  <IonButton color={"success"}>Renew</IonButton>
-                  <IonButton color={"danger"}>Cancel</IonButton>
+                  <IonButton color={"success"} onClick={()=> setShowTierSubscription(true)}>Renew</IonButton>
+                  {/* <IonButton color={"danger"}>Cancel</IonButton> */}
                 </IonCol>
               </IonRow>
             </IonGrid>
@@ -111,6 +111,20 @@ const Membership: React.FC = () => {
               <IonRow>
                 <IonCol style={{ textAlign: 'center' }}>
                   <IonCard >
+                    <IonText style={{ fontSize: '25px', }}>Silver Tier</IonText>
+                    <IonRow >
+                      <IonList>
+                        <IonItem lines='none'>Access to all basic Fitness Guru services  </IonItem>
+                        <IonItem lines='none'>Additional fees for some special programs, such as child fitness</IonItem>
+                      </IonList>
+                    </IonRow>
+                    <IonButton id="select-plan" onClick={handleSelectPlan}>Select Plan</IonButton>
+                  </IonCard>
+                </IonCol>
+                <IonCol style={{ textAlign: 'center' }}>
+                  {/* Silver Membership Card */}
+
+                  <IonCard >
                     <IonText style={{ fontSize: '25px', }}>Gold Tier</IonText>
                     <IonRow >
                       <IonList>
@@ -120,19 +134,6 @@ const Membership: React.FC = () => {
                       </IonList>
                     </IonRow>
                     <IonButton id="select-plan">Select Plan</IonButton>
-                  </IonCard>
-                </IonCol>
-                <IonCol style={{ textAlign: 'center' }}>
-                  {/* Silver Membership Card */}
-                  <IonCard >
-                    <IonText style={{ fontSize: '25px', }}>Silver Tier</IonText>
-                    <IonRow >
-                      <IonList>
-                        <IonItem lines='none'>Access to all basic Fitness Guru services  </IonItem>
-                        <IonItem lines='none'>Additional fees for some special programs, such as child fitness</IonItem>
-                      </IonList>
-                    </IonRow>
-                    <IonButton id="select-plan" onClick={handleSelectPlan}>Select Plan</IonButton>
                   </IonCard>
                 </IonCol>
               </IonRow>
