@@ -4,7 +4,7 @@ import pymysql
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-from datetime import date, time
+from datetime import datetime
 
 
 app = FastAPI()
@@ -16,6 +16,7 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["*"],
 )
+
 
 def db_connection():
     try:
@@ -42,8 +43,8 @@ class Class(BaseModel):
     instructor: str
 
 class Progress(BaseModel):
-    Date: str
-    Time: str
+    StartTime: str 
+    EndTime: str
     Distance: float
     Calories: int
     Heartrate: int
@@ -60,6 +61,7 @@ class Member(BaseModel):
 @app.get("/")
 async def root():
     return {"message": "Hello World from Fitness Guru"}
+
 
 @app.get("/classes", response_model=List[Class])
 async def get_classes():
@@ -87,6 +89,7 @@ async def get_classes():
             print(f"KeyError: {e}. Class data: {class_data}")
 
     return class_items
+
 
 @app.get("/schedule/{member_id}", response_model=List[Class])
 async def get_schedule(member_id: int):
@@ -120,6 +123,7 @@ async def get_schedule(member_id: int):
             print(f"KeyError: {e}. Class data: {class_data}")
 
     return schedule_items
+
 
 @app.post("/classes/{member_id}/{class_id}")
 async def post_class(member_id: int, class_id: int):
@@ -162,7 +166,8 @@ async def get_progress(member_id: int):
     conn = db_connection()
     cursor = conn.cursor()
     query = """
-    SELECT Progress.* FROM Progress
+    SELECT Progress.Date, Progress.StartTime, Progress.EndTime, Progress.Distance, Progress.Calories, Progress.Heartrate, Progress.Exercise
+    FROM Progress
     JOIN Member_Progress ON Progress.ProgressID = Member_Progress.ProgressID
     WHERE Member_Progress.MemberID = %s
     """
@@ -170,20 +175,46 @@ async def get_progress(member_id: int):
     progress_reports = cursor.fetchall()
     cursor.close()
     conn.close()
-    return progress_reports
+    
+    progress_items = []
+    for progress_data in progress_reports:
+        progress_item = Progress(
+            Date=str(progress_data['Date']),
+            StartTime=str(progress_data['StartTime']),
+            EndTime=str(progress_data['EndTime']),
+            Distance=progress_data['Distance'],
+            Calories=progress_data['Calories'],
+            Heartrate=progress_data['Heartrate'],
+            Exercise=progress_data['Exercise']
+        )
+        progress_items.append(progress_item)
+
+    return progress_items
+
+
 
 @app.post("/progress", response_model=Progress)
 async def post_progress(progress: Progress, member_id: int):
     conn = db_connection()
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO Progress (Date, Time, Distance, Calories, Heartrate, Exercise) VALUES (%s, %s, %s, %s, %s, %s)",
-                   (progress.Date, progress.Time, progress.Distance, progress.Calories, progress.Heartrate, progress.Exercise))
+    
+    current_date = datetime.now().date()
+    
+    cursor.execute(
+        "INSERT INTO Progress (Date, StartTime, EndTime, Distance, Calories, Heartrate, Exercise) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+        (current_date, progress.StartTime, progress.EndTime, progress.Distance, progress.Calories, progress.Heartrate, progress.Exercise)
+    )
     progress_id = cursor.lastrowid
-    cursor.execute("INSERT INTO Member_Progress (MemberID, ProgressID) VALUES (%s, %s)", (member_id, progress_id))
+    
+    cursor.execute(
+        "INSERT INTO Member_Progress (MemberID, ProgressID) VALUES (%s, %s)",
+        (member_id, progress_id)
+    )
     conn.commit()
     cursor.close()
     conn.close()
-    return {"message": "Progress added successfully", "ProgressID": progress_id}
+    
+    return {"message": "Progress added successfully", "ProgressID": progress_id, "Date": current_date.strftime("%Y-%m-%d")}
 
 @app.post("/members/{member_id}/tier/{new_tier}")
 async def post_tier(member_id: int, new_tier: int):
@@ -222,6 +253,31 @@ async def get_member(member_id: int):
     
     return member
 
+
+@app.post("/members/{member_id}/renew/{months}")
+async def renew_membership(member_id: int, months: int):
+    conn = db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT EndDate FROM Member WHERE MemberID = %s", (member_id,))
+    current_end_date = cursor.fetchone()
+    if current_end_date is None:
+        cursor.close()
+        conn.close()
+        return {"message": "Member not found"}
+
+    new_end_date = current_end_date[0]
+    if new_end_date:
+        cursor.execute("UPDATE Member SET EndDate = DATE_ADD(EndDate, INTERVAL %s MONTH) WHERE MemberID = %s", (months, member_id))
+        conn.commit()
+    else:
+        new_end_date = datetime.now()
+        cursor.execute("UPDATE Member SET EndDate = DATE_ADD(%s, INTERVAL %s MONTH) WHERE MemberID = %s", (new_end_date, months, member_id))
+        conn.commit()
+
+    cursor.close()
+    conn.close()
+    return {"message": "Membership renewed successfully", "new_end_date": new_end_date.strftime("%Y-%m-%d")}
 
 
 if __name__ == "__main__":

@@ -26,7 +26,8 @@ CREATE TABLE Member_Class (
 CREATE TABLE Progress (
     ProgressID INT PRIMARY KEY,
     Date DATE,
-    Time TIME,
+    EndTime TIME,
+    StartTime TIME,
     Distance FLOAT,
     Calories INT,
     Heartrate INT,
