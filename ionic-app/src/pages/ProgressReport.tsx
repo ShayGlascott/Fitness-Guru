@@ -25,7 +25,6 @@ const ProgessReport: React.FC = () => {
   const fakeProgressData: ProgressItem[] = [
     { exercise: 'Running', time: 30, calories: 150, heartRate: 100 },
     { exercise: 'Cycling', time: 45, calories: 200, heartRate: 110 },
-    { exercise: 'Swimming', time: 20, calories: 100, heartRate: 90 },
     { exercise: 'Running', time: 40, calories: 180, heartRate: 105 },
     { exercise: 'Cycling', time: 50, calories: 220, heartRate: 115 },
     // Add more fake data items as needed
@@ -41,7 +40,6 @@ const ProgessReport: React.FC = () => {
         setProgress(response.data)
       });
   }
-
 
 
   return (
@@ -87,7 +85,6 @@ const ProgessReport: React.FC = () => {
                   <IonSelect placeholder="no selection">
                     <IonSelectOption value="running">Running</IonSelectOption>
                     <IonSelectOption value="cycling">Cycling</IonSelectOption>
-                    <IonSelectOption value="swimming">Swimming</IonSelectOption>
                     <IonSelectOption value="elliptical">Elliptical</IonSelectOption>
                   </IonSelect>
                 </IonCol>

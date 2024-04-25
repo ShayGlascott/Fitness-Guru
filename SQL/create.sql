@@ -1,5 +1,3 @@
-CREATE DATABASE Fitness_guru;
-
 CREATE TABLE Member (
     MemberID INT PRIMARY KEY,
     Name VARCHAR(100),
@@ -9,12 +7,12 @@ CREATE TABLE Member (
 );
 
 CREATE TABLE Class (
-    ClassID INT PRIMARY KEY
+    ClassID INT PRIMARY KEY,
     Name VARCHAR(100),
     Instructor VARCHAR(100),
     Date DATE,
     StartTime TIME,
-    EndTime TIME,
+    EndTime TIME
 );
 
 CREATE TABLE Member_Class (

@@ -1,103 +1,60 @@
 import { IonButton, IonButtons, IonCard, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonItem, IonMenu, IonMenuButton, IonMenuToggle, IonPage, IonRow, IonText, IonTitle, IonToolbar } from '@ionic/react';
 import ExploreContainer from '../components/ExploreContainer';
 import './styling.css';
-import { body } from 'ionicons/icons';
+import { body, remove } from 'ionicons/icons';
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Menu from './Menu';
 
 interface ClassItem {
   className: string;
-  startTime: number;
-  endTime: number;
+  date: string;
+  startTime: string;
+  endTime: string;
   instructor: string;
 }
 
 const Classes: React.FC = () => {
-
-  
-  const fakeClasses: ClassItem[] = [
-    {
-      className: 'Yoga',
-      startTime: 60,
-      endTime: 10,
-      instructor: 'John Doe'
-    },
-    {
-      className: 'Pilates',
-      startTime: 45,
-      endTime: 10,
-
-      instructor: 'Jane Smith'
-    },
-    {
-      className: 'Zumba',
-      startTime: 60,
-      endTime: 10,
-
-      instructor: 'Alice Johnson'
-    },
-    {
-      className: 'Spin',
-      startTime: 45,
-      endTime: 10,
-
-      instructor: 'Bob Brown'
-    },
-    {
-      className: 'Boxing',
-      startTime: 60,
-      endTime: 10,
-
-      instructor: 'Chris Davis'
-    }
-  ];
-  const [schedule, setSchedule] = useState<ClassItem[]>(fakeClasses);
-  const [classes, setClasses] = useState<ClassItem[]>(fakeClasses);
+  const [schedule, setSchedule] = useState<ClassItem[]>([]);
+  const [classes, setClasses] = useState<ClassItem[]>([]);
 
   function getClasses() {
     axios.get('http://localhost:8000/classes')
       .then(function (response) {
-        console.log(response);
-        const classData = response.data.map((classItem: ClassItem) => ({
-          className: classItem.className,
-          time: classItem.startTime,
-          instructor: classItem.instructor
-        }));
-        setClasses(classData);
+        console.log(response.data);
+        setClasses(response.data);
       })
       .catch(function (error) {
         console.log(error);
       });
   }
   function getSchedule() {
-    axios.get('http://localhost:8000/classSchedule')
+    axios.get('http://localhost:8000/schedule/1')
       .then(function (response) {
         console.log(response);
-        const classData = response.data.map((classItem: ClassItem) => ({
-          className: classItem.className,
-          time: classItem.startTime,
-          instructor: classItem.instructor
-        }));
-        setSchedule(classData);
+        setSchedule(response.data);
       })
       .catch(function (error) {
         console.log(error);
       });
   }
 
-  function removeClass() {
-    axios.post('http://localhost:8000/removeClass')
+  function removeClass(classId:number) {
+    axios.post('http://localhost:8000/class/1/'+classId)
       .then(function (response) {
         console.log(response);
-        
+        window.location.reload();
       })
       .catch(function (error) {
         console.log(error);
       });
   }
 
+  useEffect(() => {
+    getClasses();
+    getSchedule();
+  }, []);
   return (
     <>
       <Menu />
@@ -162,7 +119,8 @@ const Classes: React.FC = () => {
                   <br></br>
                   <IonCol size='2.4'>
                     <IonItem lines='none'>
-                      <IonButton color={"danger"}>Delete Class</IonButton>
+                      
+                      <IonButton color={"danger"} onClick={()=>console.log(index)}>Remove Class</IonButton>
                     </IonItem>
                   </IonCol>
                 </IonRow>
@@ -179,31 +137,37 @@ const Classes: React.FC = () => {
                 <IonCard className='classes'>
                   <IonRow>
                     <IonCol style={{ textAlign: 'center' }}>
-                      <IonText style={{ fontSize: '18px' }}>{classItem.className}</IonText>
+                      <IonText style={{ fontSize: '18px' }}><u>{classItem.className}</u></IonText>
                     </IonCol>
                   </IonRow>
                   <br />
                   <IonRow>
                     <IonCol style={{ textAlign: 'center' }}>
-                      <IonText>Start time: {classItem.startTime}</IonText>
+                      <IonText><b>Date:</b> {classItem.date}</IonText>
                     </IonCol>
                   </IonRow>
                   <br />
                   <IonRow>
                     <IonCol style={{ textAlign: 'center' }}>
-                      <IonText>End time: {classItem.endTime}</IonText>
+                      <IonText><b>Start time:</b> {classItem.startTime}</IonText>
                     </IonCol>
                   </IonRow>
                   <br />
                   <IonRow>
                     <IonCol style={{ textAlign: 'center' }}>
-                      <IonText>Instructor: {classItem.instructor}</IonText>
+                      <IonText><b>End time:</b> {classItem.endTime}</IonText>
                     </IonCol>
                   </IonRow>
                   <br />
                   <IonRow>
                     <IonCol style={{ textAlign: 'center' }}>
-                      <IonButton color={"dark"}>Add Class</IonButton>
+                      <IonText><b>Instructor: </b>{classItem.instructor}</IonText>
+                    </IonCol>
+                  </IonRow>
+                  <br />
+                  <IonRow>
+                    <IonCol style={{ textAlign: 'center' }}>
+                      <IonButton color={"success"} >Add Class</IonButton>
                     </IonCol>
                   </IonRow>
                 </IonCard>

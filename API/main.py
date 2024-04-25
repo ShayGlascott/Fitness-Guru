@@ -1,27 +1,44 @@
 from fastapi import FastAPI, HTTPException
 from typing import List
-import mysql.connector
+import pymysql
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
+from datetime import date, time
+
 
 app = FastAPI()
 
-# Database Connection Configuration
-def db_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="your_username",
-        password="your_password",
-        database="Fitness_guru"
-    )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8100"],  # Update this with the origin of your frontend
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
+)
 
-# Class Models for Request and Response
+def db_connection():
+    try:
+        conn = pymysql.connect(
+            host="127.0.0.1",
+            user="root",
+            password="FuckY0u2002",
+            database="fitness_guru",
+            cursorclass=pymysql.cursors.DictCursor  
+        )
+        return conn
+    except pymysql.MySQLError as e:
+        print(f"Error connecting to MySQL: {e}")
+        return None
+
+
+# # Class Models for Request and Response
 class Class(BaseModel):
-    ClassID: int
-    Name: str
-    Instructor: str
-    Date: str
-    StartTime: str
-    EndTime: str
+    className: str
+    date: str
+    startTime: str
+    endTime: str
+    instructor: str
 
 class Progress(BaseModel):
     Date: str
@@ -30,6 +47,13 @@ class Progress(BaseModel):
     Calories: int
     Heartrate: int
     Exercise: str
+
+class Member(BaseModel):
+    MemberID: int
+    Name: str
+    StartDate: str
+    EndDate: str
+    MembershipTier: int
 
 # Endpoints
 @app.get("/")
@@ -44,7 +68,22 @@ async def get_classes():
     classes = cursor.fetchall()
     cursor.close()
     conn.close()
-    return classes
+
+    class_items = []
+    for class_data in classes:
+        try:
+            class_item = Class(
+                className=class_data["Name"],  
+                date=str(class_data["Date"]),  
+                startTime=str(class_data["StartTime"]),
+                endTime=str(class_data["EndTime"]),  
+                instructor=class_data["Instructor"]  
+            )
+            class_items.append(class_item)
+        except KeyError as e:
+            print(f"KeyError: {e}. Class data: {class_data}")
+
+    return class_items
 
 @app.get("/schedule/{member_id}", response_model=List[Class])
 async def get_schedule(member_id: int):
@@ -59,7 +98,22 @@ async def get_schedule(member_id: int):
     schedule = cursor.fetchall()
     cursor.close()
     conn.close()
-    return schedule
+
+    schedule_items = []
+    for class_data in schedule:
+        try:
+            class_item = Class(
+                className=class_data["Name"],
+                date=str(class_data["Date"]),
+                startTime=str(class_data["StartTime"]),
+                endTime=str(class_data["EndTime"]),
+                instructor=class_data["Instructor"]
+            )
+            schedule_items.append(class_item)
+        except KeyError as e:
+            print(f"KeyError: {e}. Class data: {class_data}")
+
+    return schedule_items
 
 @app.post("/classes/{member_id}/{class_id}")
 async def post_class(member_id: int, class_id: int):
@@ -70,6 +124,16 @@ async def post_class(member_id: int, class_id: int):
     cursor.close()
     conn.close()
     return {"message": "Class added to member successfully"}
+
+@app.delete("/classes/{member_id}/{class_id}")
+async def remove_class(member_id: int, class_id: int):
+    conn = db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM Member_Class WHERE MemberID = %s AND ClassID = %s", (member_id, class_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Class removed from member successfully"}
 
 @app.get("/progress/{member_id}", response_model=List[Progress])
 async def get_progress(member_id: int):
@@ -122,7 +186,7 @@ async def post_tier(member_id: int, new_tier: int):
     return {"message": "Membership tier updated successfully"}
 
 
-@app.get("/member/{member_id}", response_model=Class)
+@app.get("/member/{member_id}", response_model=Member)
 async def get_member(member_id: int):
     conn = db_connection()
     cursor = conn.cursor()
@@ -130,5 +194,13 @@ async def get_member(member_id: int):
     member = cursor.fetchone()
     cursor.close()
     conn.close()
+    
+    member["StartDate"] = member["StartDate"].strftime("%Y-%m-%d")
+    member["EndDate"] = member["EndDate"].strftime("%Y-%m-%d")
+    
     return member
 
+
+
+if __name__ == "__main__":
+    uvicorn.run("__main__:app", host="0.0.0.0", port=8000, reload=True)
