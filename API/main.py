@@ -125,21 +125,37 @@ async def get_schedule(member_id: int):
 async def post_class(member_id: int, class_id: int):
     conn = db_connection()
     cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM Member_Class WHERE MemberID = %s AND ClassID = %s", (member_id, class_id))
+    if cursor.fetchone() is not None:
+        cursor.close()
+        conn.close()
+        return {"message": "Class already added to schedule"}
+
     cursor.execute("INSERT INTO Member_Class (MemberID, ClassID) VALUES (%s, %s)", (member_id, class_id))
     conn.commit()
     cursor.close()
     conn.close()
-    return {"message": "Class added to member successfully"}
+    return {"message": "Class added to schedule successfully"}
+
 
 @app.delete("/classes/{member_id}/{class_id}")
 async def remove_class(member_id: int, class_id: int):
     conn = db_connection()
     cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM Member_Class WHERE MemberID = %s AND ClassID = %s", (member_id, class_id))
+    if cursor.fetchone() is None:
+        cursor.close()
+        conn.close()
+        return {"message": "Class not found in schedule"}
+
     cursor.execute("DELETE FROM Member_Class WHERE MemberID = %s AND ClassID = %s", (member_id, class_id))
     conn.commit()
     cursor.close()
     conn.close()
-    return {"message": "Class removed from member successfully"}
+    return {"message": "Class removed from schedule successfully"}
+
 
 @app.get("/progress/{member_id}", response_model=List[Progress])
 async def get_progress(member_id: int):
