@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from typing import List
+from typing import List, Optional
 import pymysql
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
@@ -34,6 +34,7 @@ def db_connection():
 
 # # Class Models for Request and Response
 class Class(BaseModel):
+    classID: Optional[int]
     className: str
     date: str
     startTime: str
@@ -73,6 +74,8 @@ async def get_classes():
     for class_data in classes:
         try:
             class_item = Class(
+                classID=class_data["ClassID"],
+
                 className=class_data["Name"],  
                 date=str(class_data["Date"]),  
                 startTime=str(class_data["StartTime"]),
@@ -90,7 +93,8 @@ async def get_schedule(member_id: int):
     conn = db_connection()
     cursor = conn.cursor()
     query = """
-    SELECT Class.* FROM Class
+    SELECT Class.ClassID, Class.Name, Class.Date, Class.StartTime, Class.EndTime, Class.Instructor
+    FROM Class
     JOIN Member_Class ON Class.ClassID = Member_Class.ClassID
     WHERE Member_Class.MemberID = %s
     """
@@ -98,11 +102,13 @@ async def get_schedule(member_id: int):
     schedule = cursor.fetchall()
     cursor.close()
     conn.close()
-
+    
     schedule_items = []
     for class_data in schedule:
         try:
+            
             class_item = Class(
+                classID=class_data["ClassID"],
                 className=class_data["Name"],
                 date=str(class_data["Date"]),
                 startTime=str(class_data["StartTime"]),

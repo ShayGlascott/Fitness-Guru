@@ -1,4 +1,4 @@
-import { IonButton, IonButtons, IonCard, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonItem, IonMenu, IonMenuButton, IonMenuToggle, IonPage, IonRow, IonText, IonTitle, IonToolbar } from '@ionic/react';
+import { IonButton, IonButtons, IonCard, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonItem, IonMenu, IonMenuButton, IonMenuToggle, IonPage, IonRow, IonText, IonTitle, IonToast, IonToolbar } from '@ionic/react';
 import ExploreContainer from '../components/ExploreContainer';
 import './styling.css';
 import { body, remove } from 'ionicons/icons';
@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import Menu from './Menu';
 
 interface ClassItem {
+  classID?:number;
   className: string;
   date: string;
   startTime: string;
@@ -18,12 +19,15 @@ interface ClassItem {
 const Classes: React.FC = () => {
   const [schedule, setSchedule] = useState<ClassItem[]>([]);
   const [classes, setClasses] = useState<ClassItem[]>([]);
+  const [showToast, setShowToast] = useState<boolean>(false);
+
 
   function getClasses() {
     axios.get('http://localhost:8000/classes')
       .then(function (response) {
-        console.log(response.data);
+        // console.log(response.data);
         setClasses(response.data);
+        
       })
       .catch(function (error) {
         console.log(error);
@@ -32,16 +36,29 @@ const Classes: React.FC = () => {
   function getSchedule() {
     axios.get('http://localhost:8000/schedule/1')
       .then(function (response) {
-        console.log(response);
+        console.log(response.data);
         setSchedule(response.data);
+        
       })
       .catch(function (error) {
         console.log(error);
       });
   }
 
-  function removeClass(classId:number) {
-    axios.post('http://localhost:8000/class/1/'+classId)
+  function removeClass(classID: string | number | undefined) {
+    console.log(classID);
+    axios.delete('http://localhost:8000/classes/1/'+classID)
+      .then(function (response) {
+        console.log(response);
+        window.location.reload();
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
+  function addClass(classID: string | number | undefined) {
+    console.log(classID);
+    axios.post('http://localhost:8000/classes/1/'+classID)
       .then(function (response) {
         console.log(response);
         window.location.reload();
@@ -120,7 +137,7 @@ const Classes: React.FC = () => {
                   <IonCol size='2.4'>
                     <IonItem lines='none'>
                       
-                      <IonButton color={"danger"} onClick={()=>console.log(index)}>Remove Class</IonButton>
+                      <IonButton color={"danger"} onClick={()=>removeClass(classItem.classID)}>Remove Class</IonButton>
                     </IonItem>
                   </IonCol>
                 </IonRow>
@@ -134,6 +151,7 @@ const Classes: React.FC = () => {
                 </IonCol>
               </IonRow>
               {classes.map((classItem, index) => (
+
                 <IonCard className='classes'>
                   <IonRow>
                     <IonCol style={{ textAlign: 'center' }}>
@@ -167,14 +185,16 @@ const Classes: React.FC = () => {
                   <br />
                   <IonRow>
                     <IonCol style={{ textAlign: 'center' }}>
-                      <IonButton color={"success"} >Add Class</IonButton>
+                      <IonButton color={"success"} onClick={()=>addClass(classItem.classID)}>Add Class</IonButton>
                     </IonCol>
                   </IonRow>
                 </IonCard>
               ))}
             </IonCard>
           </IonGrid>
-
+          <IonToast 
+            
+          />
         </IonContent>
       </IonPage >
     </>

@@ -22,16 +22,10 @@ interface ProgressItem {
 
 
 const ProgessReport: React.FC = () => {
-  const fakeProgressData: ProgressItem[] = [
-    { exercise: 'Running', time: 30, calories: 150, heartRate: 100 },
-    { exercise: 'Cycling', time: 45, calories: 200, heartRate: 110 },
-    { exercise: 'Running', time: 40, calories: 180, heartRate: 105 },
-    { exercise: 'Cycling', time: 50, calories: 220, heartRate: 115 },
-    // Add more fake data items as needed
-  ];
+  
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
-  const [progress, setProgress] = useState<ProgressItem[]>(fakeProgressData);
+  const [progress, setProgress] = useState<ProgressItem[]>([]);
   const [memberId, setMemberId] = useState<Number>(1);
   function getProgress() {
     axios.get('http://localhost:8000/progress/' + memberId)
