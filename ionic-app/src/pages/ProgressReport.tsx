@@ -1,40 +1,65 @@
 import { IonButton, IonButtons, IonCard, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonInput, IonItem, IonLabel, IonMenu, IonMenuButton, IonMenuToggle, IonPage, IonRow, IonSelect, IonSelectOption, IonText, IonTitle, IonToolbar } from '@ionic/react';
-import ExploreContainer from '../components/ExploreContainer';
-import './styling.css';
-import { NavLink } from 'react-router-dom';
-import { body, magnet } from 'ionicons/icons';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useState } from 'react';
+import './styling.css';
 import Menu from './Menu';
-import { Line } from 'react-chartjs-2';
-
-
-interface ProgressGraphProps {
-  data: ProgressItem[]; 
-}
 
 interface ProgressItem {
-  exercise: string;
-  time?: number;
-  calories?: number;
-  heartRate?: number;
+  Date: string;
+  StartTime: string;
+  EndTime: string;
+  Distance: number;
+  Calories: number;
+  Heartrate: number;
+  Exercise: string;
 }
 
+const ProgressReport: React.FC = () => {
+  const [progressItems, setProgressItems] = useState<ProgressItem[]>([]);
+  const [exercise, setExercise] = useState<string>('');
+  const [startTime, setStartTime] = useState<string>('');
+  const [endTime, setEndTime] = useState<string>('');
+  const [distance, setDistance] = useState<number | undefined>();
+  const [calories, setCalories] = useState<number | undefined>();
+  const [heartrate, setHeartrate] = useState<number | undefined>();
+  const memberId = 1;
 
-const ProgessReport: React.FC = () => {
-  
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [progress, setProgress] = useState<ProgressItem[]>([]);
-  const [memberId, setMemberId] = useState<Number>(1);
-  function getProgress() {
-    axios.get('http://localhost:8000/progress/' + memberId)
-      .then(function (response) {
-        console.log(response);
-        setProgress(response.data)
-      });
-  }
+  useEffect(() => {
+    fetchProgress();
+  }, []);
 
+  const fetchProgress = () => {
+    axios.get(`http://localhost:8000/progress/${memberId}`)
+      .then(response => {
+        setProgressItems(response.data);
+      })
+      .catch(error => console.error("There was an error fetching the progress data:", error));
+  };
+
+  const postProgress = () => {
+    if (!exercise || !startTime || !endTime || !distance || !calories || !heartrate) {
+      console.error("All fields must be filled");
+      return;
+    }
+
+    const progressData = {
+      StartTime: startTime,
+      EndTime: endTime,
+      Distance: distance,
+      Calories: calories,
+      Heartrate: heartrate,
+      Exercise: exercise
+    };
+
+    axios.post(`http://localhost:8000/progress`, progressData, {
+      params: { member_id: memberId }
+    })
+      .then(() => {
+        fetchProgress(); // Reload the progress after adding
+        console.log("Progress added successfully");
+      })
+      .catch(error => console.error("Failed to post progress:", error));
+  };
 
   return (
     <>
@@ -43,83 +68,76 @@ const ProgessReport: React.FC = () => {
         <IonHeader>
           <IonToolbar>
             <IonButtons slot="start">
-              <IonMenuButton></IonMenuButton>
+              <IonMenuButton />
             </IonButtons>
             <IonTitle>Progress Report</IonTitle>
           </IonToolbar>
         </IonHeader>
         <IonContent className="ion-padding">
-          {/* Enter exercise card */}
           <IonCard className="card">
             <IonGrid>
               <IonRow>
-                <IonCol >
-                  <IonText>Exercise</IonText>
-                </IonCol>
-                <IonCol >
-                  <IonText>Start Time</IonText>
-                </IonCol>
-                <IonCol >
-                  <IonText>End Time</IonText>
-                </IonCol>
-                <IonCol >
-                  <IonText>Distance (miles)</IonText>
-                </IonCol>
-                <IonCol >
-                  <IonText>Calories</IonText>
-                </IonCol>
-                <IonCol >
-                  <IonText>Heart Rate (bpm)</IonText>
-                </IonCol>
-                <IonCol >
-                </IonCol>
+                <IonCol><IonText>Exercise</IonText></IonCol>
+                <IonCol><IonText>Start Time</IonText></IonCol>
+                <IonCol><IonText>End Time</IonText></IonCol>
+                <IonCol><IonText>Distance (miles)</IonText></IonCol>
+                <IonCol><IonText>Calories</IonText></IonCol>
+                <IonCol><IonText>Heart Rate (bpm)</IonText></IonCol>
+                <IonCol />
               </IonRow>
               <IonRow>
-                <IonCol >
-                  <IonSelect placeholder="no selection">
+                <IonCol>
+                  <IonSelect placeholder="Select Exercise" value={exercise} onIonChange={e => setExercise(e.detail.value)}>
                     <IonSelectOption value="running">Running</IonSelectOption>
                     <IonSelectOption value="cycling">Cycling</IonSelectOption>
                     <IonSelectOption value="elliptical">Elliptical</IonSelectOption>
                   </IonSelect>
                 </IonCol>
-                <IonCol >
-                  <IonInput
-                    type="time"
-                    placeholder="Select Start Time"
-                    value={startTime}
-                    onIonChange={(e) => setStartTime(e.detail.value!)}
-                  />
+                <IonCol>
+                  <IonInput type="time" placeholder="Select Start Time" value={startTime} onIonChange={e => setStartTime(e.detail.value!)} />
                 </IonCol>
-                <IonCol >
-                  <IonInput
-                    type="time"
-                    placeholder="Select End Time"
-                    value={endTime}
-                    onIonChange={(e) => setEndTime(e.detail.value!)}
-                  />
+                <IonCol>
+                  <IonInput type="time" placeholder="Select End Time" value={endTime} onIonChange={e => setEndTime(e.detail.value!)} />
                 </IonCol>
-                <IonCol >
-                  <IonInput type='number' id='distance' placeholder='0'></IonInput>
+                <IonCol>
+                  <IonInput type='number' placeholder='0' value={distance} onIonChange={e => setDistance(parseFloat(e.detail.value!))} />
                 </IonCol>
-                <IonCol >
-                  <IonInput type='number' id='calories' placeholder='0'></IonInput>
+                <IonCol>
+                  <IonInput type='number' placeholder='0' value={calories} onIonChange={e => setCalories(parseInt(e.detail.value!, 10))} />
                 </IonCol>
-                <IonCol >
-                  <IonInput type='number' id='heartRate' placeholder='0'></IonInput>
+                <IonCol>
+                  <IonInput type='number' placeholder='0' value={heartrate} onIonChange={e => setHeartrate(parseInt(e.detail.value!, 10))} />
                 </IonCol>
-                <IonCol >
-                  <IonButton color={"success"}>Add</IonButton>
+                <IonCol>
+                  <IonButton color="success" onClick={postProgress}>Add</IonButton>
                 </IonCol>
               </IonRow>
             </IonGrid>
           </IonCard>
-          <IonCard className='card'>
-            <IonRow>
-              <IonCol style={{textAlign: "center"}}>
-                <h1>Graphs</h1>          
 
-              </IonCol>
-            </IonRow>
+          <IonCard className="card">
+            <IonGrid>
+              <IonRow>
+                <IonCol><IonText>Date</IonText></IonCol>
+                <IonCol><IonText>Start Time</IonText></IonCol>
+                <IonCol><IonText>End Time</IonText></IonCol>
+                <IonCol><IonText>Distance</IonText></IonCol>
+                <IonCol><IonText>Calories</IonText></IonCol>
+                <IonCol><IonText>Heart Rate</IonText></IonCol>
+                <IonCol><IonText>Exercise</IonText></IonCol>
+              </IonRow>
+              {progressItems.map((item, index) => (
+                <IonRow key={index}>
+                  <IonCol>{item.Date}</IonCol>
+                  <IonCol>{item.StartTime}</IonCol>
+                  <IonCol>{item.EndTime}</IonCol>
+                  <IonCol>{item.Distance}</IonCol>
+                  <IonCol>{item.Calories}</IonCol>
+                  <IonCol>{item.Heartrate}</IonCol>
+                  <IonCol>{item.Exercise}</IonCol>
+                </IonRow>
+              ))}
+            </IonGrid>
           </IonCard>
         </IonContent>
       </IonPage>
@@ -127,4 +145,4 @@ const ProgessReport: React.FC = () => {
   );
 };
 
-export default ProgessReport;
+export default ProgressReport;
