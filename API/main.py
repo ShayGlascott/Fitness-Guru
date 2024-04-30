@@ -44,6 +44,7 @@ class Class(BaseModel):
 
 class Progress(BaseModel):
     StartTime: str 
+    Date: str
     EndTime: str
     Distance: float
     Calories: int
@@ -211,10 +212,20 @@ async def post_progress(progress: Progress, member_id: int):
         (member_id, progress_id)
     )
     conn.commit()
+    
+    # Fetch the newly inserted progress record to return as response
+    cursor.execute("SELECT * FROM Progress WHERE ProgressID = %s", (progress_id,))
+    new_progress_data = cursor.fetchone()
+    new_progress_data["StartTime"] = str(new_progress_data["StartTime"])
+    new_progress_data["EndTime"] = str(new_progress_data["EndTime"])
+    new_progress_data["Date"] = str(new_progress_data["Date"])
+
     cursor.close()
     conn.close()
     
-    return {"message": "Progress added successfully", "ProgressID": progress_id, "Date": current_date.strftime("%Y-%m-%d")}
+    new_progress = Progress(**new_progress_data)
+    
+    return new_progress
 
 @app.post("/members/{member_id}/tier/{new_tier}")
 async def post_tier(member_id: int, new_tier: int):
@@ -265,16 +276,19 @@ async def renew_membership(member_id: int, months: int):
         cursor.close()
         conn.close()
         return {"message": "Member not found"}
-
-    new_end_date = current_end_date[0]
-    if new_end_date:
-        cursor.execute("UPDATE Member SET EndDate = DATE_ADD(EndDate, INTERVAL %s MONTH) WHERE MemberID = %s", (months, member_id))
-        conn.commit()
+    print(current_end_date)
+    if current_end_date is not None:
+        new_end_date = current_end_date['EndDate']
+   
+        if new_end_date:
+            cursor.execute("UPDATE Member SET EndDate = DATE_ADD(EndDate, INTERVAL %s MONTH) WHERE MemberID = %s", (months, member_id))
+            conn.commit()
+        else:
+            new_end_date = datetime.now()
+            cursor.execute("UPDATE Member SET EndDate = DATE_ADD(%s, INTERVAL %s MONTH) WHERE MemberID = %s", (new_end_date, months, member_id))
+            conn.commit()
     else:
-        new_end_date = datetime.now()
-        cursor.execute("UPDATE Member SET EndDate = DATE_ADD(%s, INTERVAL %s MONTH) WHERE MemberID = %s", (new_end_date, months, member_id))
-        conn.commit()
-
+        return {"message": "Current_end_date does not exist"}
     cursor.close()
     conn.close()
     return {"message": "Membership renewed successfully", "new_end_date": new_end_date.strftime("%Y-%m-%d")}
