@@ -9,30 +9,21 @@ import { NavLink } from 'react-router-dom';
 import axios from 'axios';
 
 const Membership: React.FC = () => {
+  const [memberTier, setMemberTier] = useState<number>(-1);
   const [username, setUsername] = useState<string>('');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [showErrorTierAlert, setShowErrorTierAlert] = useState(false);
-  const [showTierSubscription, setShowTierSubscription] = useState(false);
+  const [showRenewSubscription, setShowRenewSubscription] = useState(false);
+  const [showChangeSubscription, setShowChangeSubscription] = useState(false);
   const [selectedSubscription, setSelectedSubscription] = useState(0);
   const [selectedTier, setSelectedTier] = useState<number>(-1);
-  const currentDate: Date = new Date();
-  console.log(currentDate);
-  function updateTier() {
-    axios.post(`http://localhost:8000/member/0/tier/` + selectedTier)
-      .then(function (response) {
-        console.log(response.data)
 
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-
-  }
   function getMember() {
     axios.get(`http://localhost:8000/member/1`)
       .then(function (response) {
-        console.log(response.data);
+        // console.log(response.data);
+        setMemberTier(response.data.MembershipTier)
         setUsername(response.data.Name);
         setStartDate(response.data.StartDate);
         setEndDate(response.data.EndDate);
@@ -41,16 +32,53 @@ const Membership: React.FC = () => {
         console.log(error);
       });
   }
-  const handleConfirm = () => {
+  const handleConfirmRenew = () => {
     console.log('Selected subscription:', selectedSubscription);
-    setShowTierSubscription(false);
+    axios.post(`http://localhost:8000/members/1/renew/` + selectedSubscription)
+      .then(function (response) {
+        console.log(response);
+        getMember();
+
+      })
+      .catch(function (error) {
+
+      });
+    setShowRenewSubscription(false);
   };
 
   useEffect(() => {
     getMember();
   }, [])
-  function handleSelectPlan() {
+  function handleSelectPlan(tier: number) {
+    if (memberTier === tier) {
+      setShowErrorTierAlert(true);
+    } else {
+      setShowChangeSubscription(true);
+    }
+  }
 
+  function handleConfirmChangeSubscription() {
+    if (memberTier === 1) {
+      axios.post(`http://localhost:8000/member/1/tier/0`)
+        .then(function (response) {
+          console.log(response.data)
+
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+
+    } else {
+      axios.post(`http://localhost:8000/member/1/tier/1`)
+        .then(function (response) {
+          console.log(response.data)
+
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+
+    }
   }
 
   return (
@@ -99,7 +127,7 @@ const Membership: React.FC = () => {
                   </IonItem>
                 </IonCol>
                 <IonCol size='3'>
-                  <IonButton color={"success"} onClick={()=> setShowTierSubscription(true)}>Renew</IonButton>
+                  <IonButton color={"success"} onClick={() => setShowRenewSubscription(true)}>Renew</IonButton>
                   {/* <IonButton color={"danger"}>Cancel</IonButton> */}
                 </IonCol>
               </IonRow>
@@ -118,7 +146,7 @@ const Membership: React.FC = () => {
                         <IonItem lines='none'>Additional fees for some special programs, such as child fitness</IonItem>
                       </IonList>
                     </IonRow>
-                    <IonButton id="select-plan" onClick={handleSelectPlan}>Select Plan</IonButton>
+                    <IonButton id="select-plan" onClick={() => handleSelectPlan(0)}>Select Plan</IonButton>
                   </IonCard>
                 </IonCol>
                 <IonCol style={{ textAlign: 'center' }}>
@@ -133,7 +161,7 @@ const Membership: React.FC = () => {
                         <IonItem lines='none'>Complimentary access to most amenities</IonItem>
                       </IonList>
                     </IonRow>
-                    <IonButton id="select-plan">Select Plan</IonButton>
+                    <IonButton id="select-plan" onClick={() => handleSelectPlan(1)}>Select Plan</IonButton>
                   </IonCard>
                 </IonCol>
               </IonRow>
@@ -147,10 +175,10 @@ const Membership: React.FC = () => {
             message="Select another plan or renew/cancel your existing plan"
             buttons={['Cancel']}
           />
-          {/* Tier Subscription */}
+          {/* Renew Subscription */}
           <IonAlert
-            isOpen={showTierSubscription}
-            onDidDismiss={() => setShowTierSubscription(false)}
+            isOpen={showRenewSubscription}
+            onDidDismiss={() => setShowRenewSubscription(false)}
             header="Select Length of subscription"
             inputs={[
               {
@@ -182,11 +210,27 @@ const Membership: React.FC = () => {
               {
                 text: 'Cancel',
                 role: 'cancel',
-                handler: () => setShowTierSubscription(false),
+                handler: () => setShowRenewSubscription(false),
               },
               {
                 text: 'Confirm',
-                handler: handleConfirm,
+                handler: handleConfirmRenew,
+              },
+            ]}
+          />
+          <IonAlert
+            isOpen={showChangeSubscription}
+            onDidDismiss={() => setShowChangeSubscription(false)}
+            header="Are you sure you want to change your subscription tier?"
+            buttons={[
+              {
+                text: 'Cancel',
+                role: 'cancel',
+                handler: () => setShowChangeSubscription(false),
+              },
+              {
+                text: 'Confirm',
+                handler: handleConfirmChangeSubscription,
               },
             ]}
           />

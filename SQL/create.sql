@@ -24,7 +24,7 @@ CREATE TABLE Member_Class (
 );
 
 CREATE TABLE Progress (
-    ProgressID INT PRIMARY KEY,
+    ProgressID INT AUTO_INCREMENT PRIMARY KEY,
     Date DATE,
     EndTime TIME,
     StartTime TIME,

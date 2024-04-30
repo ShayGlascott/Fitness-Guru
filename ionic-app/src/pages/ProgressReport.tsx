@@ -37,6 +37,27 @@ const ProgressReport: React.FC = () => {
   };
 
   const postProgress = () => {
+    const exerciseValue = document.getElementById('exercise') as HTMLInputElement;
+    const startTimeValue = document.getElementById('startTime') as HTMLInputElement;
+    const endTimeValue = document.getElementById('endTime') as HTMLInputElement;
+    const distanceValue = document.getElementById('distance') as HTMLInputElement;
+    const caloriesValue = document.getElementById('calories') as HTMLInputElement;
+    const heartrateValue = document.getElementById('heartrate') as HTMLInputElement;
+
+    const exercise = exerciseValue.value;
+    const startTime = startTimeValue.value;
+    const endTime = endTimeValue.value;
+    const distance = parseFloat(distanceValue.value);
+    const calories = parseInt(caloriesValue.value, 10);
+    const heartrate = parseInt(heartrateValue.value, 10);
+
+    console.log("Exercise:", exercise);
+    console.log("Start Time:", startTime);
+    console.log("End Time:", endTime);
+    console.log("Distance:", distance);
+    console.log("Calories:", calories);
+    console.log("Heart Rate:", heartrate);
+
     if (!exercise || !startTime || !endTime || !distance || !calories || !heartrate) {
       console.error("All fields must be filled");
       return;
@@ -55,7 +76,7 @@ const ProgressReport: React.FC = () => {
       params: { member_id: memberId }
     })
       .then(() => {
-        fetchProgress(); // Reload the progress after adding
+        fetchProgress(); 
         console.log("Progress added successfully");
       })
       .catch(error => console.error("Failed to post progress:", error));
@@ -87,26 +108,26 @@ const ProgressReport: React.FC = () => {
               </IonRow>
               <IonRow>
                 <IonCol>
-                  <IonSelect placeholder="Select Exercise" value={exercise} onIonChange={e => setExercise(e.detail.value)}>
+                  <IonSelect id="exercise" placeholder="Select Exercise" value={exercise}>
                     <IonSelectOption value="running">Running</IonSelectOption>
                     <IonSelectOption value="cycling">Cycling</IonSelectOption>
                     <IonSelectOption value="elliptical">Elliptical</IonSelectOption>
                   </IonSelect>
                 </IonCol>
                 <IonCol>
-                  <IonInput type="time" placeholder="Select Start Time" value={startTime} onIonChange={e => setStartTime(e.detail.value!)} />
+                  <IonInput id="startTime" type="time" placeholder="Select Start Time" value={startTime} />
                 </IonCol>
                 <IonCol>
-                  <IonInput type="time" placeholder="Select End Time" value={endTime} onIonChange={e => setEndTime(e.detail.value!)} />
+                  <IonInput id="endTime" type="time" placeholder="Select End Time" value={endTime} />
                 </IonCol>
                 <IonCol>
-                  <IonInput type='number' placeholder='0' value={distance} onIonChange={e => setDistance(parseFloat(e.detail.value!))} />
+                  <IonInput id="distance" type='number' placeholder='0' value={distance} />
                 </IonCol>
                 <IonCol>
-                  <IonInput type='number' placeholder='0' value={calories} onIonChange={e => setCalories(parseInt(e.detail.value!, 10))} />
+                  <IonInput id="calories" type='number' placeholder='0' value={calories} />
                 </IonCol>
                 <IonCol>
-                  <IonInput type='number' placeholder='0' value={heartrate} onIonChange={e => setHeartrate(parseInt(e.detail.value!, 10))} />
+                  <IonInput id="heartrate" type='number' placeholder='0' value={heartrate} />
                 </IonCol>
                 <IonCol>
                   <IonButton color="success" onClick={postProgress}>Add</IonButton>

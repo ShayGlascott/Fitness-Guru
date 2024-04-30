@@ -55,7 +55,7 @@ const Classes: React.FC = () => {
           setToastMsg(response.data.message);
         }
         else{
-          window.location.reload();
+          getSchedule();
         }
       })
       .catch(function (error) {
@@ -72,7 +72,7 @@ const Classes: React.FC = () => {
           setToastMsg(response.data.message);
         }
         else {
-          window.location.reload();
+          getSchedule();
         }
 
       })
