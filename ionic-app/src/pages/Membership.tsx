@@ -7,9 +7,11 @@ import Menu from './Menu';
 import { body, thermometer } from 'ionicons/icons';
 import { NavLink } from 'react-router-dom';
 import axios from 'axios';
+import { waitFor } from '@testing-library/react';
 
 const Membership: React.FC = () => {
-  const [memberTier, setMemberTier] = useState<number>(-1);
+  const [memberTier, setMemberTier] = useState<number>();
+  const [currentTier, setCurrentTier] = useState<string>("");
   const [username, setUsername] = useState<string>('');
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
@@ -23,7 +25,13 @@ const Membership: React.FC = () => {
     axios.get(`http://localhost:8000/member/1`)
       .then(function (response) {
         // console.log(response.data);
-        setMemberTier(response.data.MembershipTier)
+        setMemberTier(response.data.MembershipTier);
+        if (response.data.MembershipTier == 0) {
+          setCurrentTier("Silver");
+        }
+        else {
+          setCurrentTier("Gold");
+        }
         setUsername(response.data.Name);
         setStartDate(response.data.StartDate);
         setEndDate(response.data.EndDate);
@@ -59,20 +67,22 @@ const Membership: React.FC = () => {
 
   function handleConfirmChangeSubscription() {
     if (memberTier === 1) {
-      axios.post(`http://localhost:8000/member/1/tier/0`)
+      axios.post(`http://localhost:8000/members/1/tier/0`)
         .then(function (response) {
           console.log(response.data)
-
+          setMemberTier(0);
+          setCurrentTier("Silver");
         })
         .catch(function (error) {
           console.log(error);
         });
 
     } else {
-      axios.post(`http://localhost:8000/member/1/tier/1`)
+      axios.post(`http://localhost:8000/members/1/tier/1`)
         .then(function (response) {
           console.log(response.data)
-
+          setMemberTier(1);
+          setCurrentTier("Gold");
         })
         .catch(function (error) {
           console.log(error);
@@ -81,6 +91,9 @@ const Membership: React.FC = () => {
     }
   }
 
+  function stringTier() {
+
+  }
   return (
     <>
       <Menu />
@@ -98,37 +111,44 @@ const Membership: React.FC = () => {
           <IonCard className="card">
             <IonGrid>
               <IonRow>
-                <IonCol size='3'>
+                <IonCol size='2'>
                   <IonText>Name</IonText>
                 </IonCol>
-                <IonCol size='3'>
+                <IonCol size='2'>
                   <IonText>Start date</IonText>
                 </IonCol>
-                <IonCol size='3'>
+                <IonCol size='2'>
                   <IonText>End date</IonText>
                 </IonCol>
-                <IonCol size='3'>
+                <IonCol size='2'>
+                  <IonText>Current Tier</IonText>
+                </IonCol>
+                <IonCol size='2'>
                 </IonCol>
               </IonRow>
               <IonRow >
-                <IonCol size='3'>
+                <IonCol size='2'>
                   <IonItem lines='none'>
                     <IonText>{username}</IonText>
                   </IonItem>
                 </IonCol>
-                <IonCol size='3'>
+                <IonCol size='2'>
                   <IonItem lines='none'>
                     <IonText>{startDate}</IonText>
                   </IonItem>
                 </IonCol>
-                <IonCol size='3'>
+                <IonCol size='2'>
                   <IonItem lines='none'>
                     <IonText>{endDate}</IonText>
                   </IonItem>
                 </IonCol>
-                <IonCol size='3'>
+                <IonCol size='2'>
+                  <IonItem lines='none'>
+                    <IonText>{currentTier}</IonText>
+                  </IonItem>
+                </IonCol>
+                <IonCol size='2'>
                   <IonButton color={"success"} onClick={() => setShowRenewSubscription(true)}>Renew</IonButton>
-                  {/* <IonButton color={"danger"}>Cancel</IonButton> */}
                 </IonCol>
               </IonRow>
             </IonGrid>

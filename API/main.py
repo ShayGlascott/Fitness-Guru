@@ -231,18 +231,19 @@ async def post_progress(progress: Progress, member_id: int):
 async def post_tier(member_id: int, new_tier: int):
     conn = db_connection()
     cursor = conn.cursor()
+
     cursor.execute("SELECT MembershipTier FROM Member WHERE MemberID = %s", (member_id,))
     current_tier = cursor.fetchone()
+
     if current_tier is None:
         cursor.close()
         conn.close()
         return {"message": "Member not found"}
 
-    if current_tier[0] == new_tier:
+    if current_tier == new_tier:
         cursor.close()
         conn.close()
         return {"message": "No change made to the membership tier"}
-
     cursor.execute("UPDATE Member SET MembershipTier = %s WHERE MemberID = %s", (new_tier, member_id))
     conn.commit()
     cursor.close()
