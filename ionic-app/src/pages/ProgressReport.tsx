@@ -41,13 +41,26 @@ const ProgressReport: React.FC = () => {
   };
 
   const postProgress = () => {
-    if (!exercise || !startTime || !endTime || !distance || !calories || !heartrate) {
-      console.error("All fields must be filled");
-      return;
-    }
+    // if (!exercise || !startTime || !endTime || !distance || !calories || !heartrate) {
+    //   console.error("All fields must be filled");
+    //   return;
+    // }
+    const exerciseValue = document.getElementById('exercise') as HTMLInputElement;
+    const startTimeValue = document.getElementById('startTime') as HTMLInputElement;
+    const endTimeValue = document.getElementById('endTime') as HTMLInputElement;
+    const distanceValue = document.getElementById('distance') as HTMLInputElement;
+    const caloriesValue = document.getElementById('calories') as HTMLInputElement;
+    const heartrateValue = document.getElementById('heartrate') as HTMLInputElement;
+
+    const exercise = exerciseValue.value;
+    const startTime = startTimeValue.value;
+    const endTime = endTimeValue.value;
+    const distance = parseFloat(distanceValue.value);
+    const calories = parseInt(caloriesValue.value, 10);
+    const heartrate = parseInt(heartrateValue.value, 10);
 
     const progressData = {
-      Date: new Date().toISOString().slice(0, 10), // Assuming today's date for simplicity
+      Date: new Date().toISOString().slice(0, 10), 
       StartTime: startTime,
       EndTime: endTime,
       Distance: distance,
@@ -66,7 +79,7 @@ const ProgressReport: React.FC = () => {
       .catch(error => console.error("Failed to post progress:", error));
   };
 
-  const generateChartData = (exerciseType) => {
+  const generateChartData = (exerciseType: string) => {
     const filteredItems = progressItems.filter(item => item.Exercise === exerciseType);
     return {
       labels: filteredItems.map(item => item.Date),
@@ -126,19 +139,19 @@ const ProgressReport: React.FC = () => {
                   </IonSelect>
                 </IonCol>
                 <IonCol>
-                  <IonInput id="startTime" type="time" placeholder="Select Start Time" value={startTime} onIonChange={e => setStartTime(e.detail.value)} />
+                  <IonInput id="startTime" type="time" placeholder="Select Start Time" value={startTime} />
                 </IonCol>
                 <IonCol>
-                  <IonInput id="endTime" type="time" placeholder="Select End Time" value={endTime} onIonChange={e => setEndTime(e.detail.value)} />
+                  <IonInput id="endTime" type="time" placeholder="Select End Time" value={endTime}  />
                 </IonCol>
                 <IonCol>
-                  <IonInput id="distance" type='number' placeholder='0' value={distance} onIonChange={e => setDistance(parseFloat(e.detail.value))} />
+                  <IonInput id="distance" type='number' placeholder='0' value={distance} />
                 </IonCol>
                 <IonCol>
-                  <IonInput id="calories" type='number' placeholder='0' value={calories} onIonChange={e => setCalories(parseInt(e.detail.value, 10))} />
+                  <IonInput id="calories" type='number' placeholder='0' value={calories}  />
                 </IonCol>
                 <IonCol>
-                  <IonInput id="heartrate" type='number' placeholder='0' value={heartrate} onIonChange={e => setHeartrate(parseInt(e.detail.value, 10))} />
+                  <IonInput id="heartrate" type='number' placeholder='0' value={heartrate}  />
                 </IonCol>
                 <IonCol>
                   <IonButton color="success" onClick={postProgress}>Add</IonButton>
@@ -146,6 +159,10 @@ const ProgressReport: React.FC = () => {
               </IonRow>
             </IonGrid>
           </IonCard>
+          <h1 style={{textAlign: 'center'}}><u>Progress Graphs</u> </h1>
+     
+            
+            <br></br>
           {['running', 'cycling', 'elliptical'].map((exercise, index) => (
             <div key={index}>
               <h2>{exercise.charAt(0).toUpperCase() + exercise.slice(1)}</h2>
