@@ -72,7 +72,8 @@ const Classes: React.FC = () => {
           setToastMsg(response.data.message);
         }
         else {
-          getSchedule();
+          window.location.reload();
+          // getSchedule();
         }
 
       })
