@@ -23,7 +23,7 @@ def db_connection():
         conn = pymysql.connect(
             host="127.0.0.1",
             user="root",
-            password="FuckY0u2002",
+            password="root",
             database="fitness_guru",
             cursorclass=pymysql.cursors.DictCursor  
         )
